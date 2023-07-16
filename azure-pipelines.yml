@@ -1,0 +1,52 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+
+pool:
+  name: gs-spring-boot
+
+variables:
+- name: data
+
+steps:
+- task: SystemsManagerGetParameter@1
+  inputs:
+    awsCredentials: 'hello-world-to-AWS'
+    regionName: 'eu-west-1'
+    readMode: 'single'
+    parameterName: '/simplelambdademo/input'
+    singleNameTransform: 'custom'
+    customVariableName: 'data'
+
+- task: LambdaNETCoreDeploy@1
+  inputs:
+    awsCredentials: 'hello-world-to-AWS'
+    regionName: 'eu-west-1'
+    command: 'deployFunction'
+    packageOnly: false
+    lambdaProjectPath: 'src/LambdaShared/LambdaShared.csproj'
+    functionName: 'SimpleLambda'
+    functionRole: 'ItzhakLambda_Role'
+    functionHandler: 'SimpleLambda'
+    functionMemory: 256
+    functionTimeout: 30
+    
+- task: LambdaInvokeFunction@1
+  inputs:
+    awsCredentials: 'hello-world-to-AWS'
+    regionName: eu-west-1
+    functionName: 'SimpleLambda'
+    payload: '"$(data)"'
+    outputVariable: 'data'
+    logType: 'Tail'
+
+- task: SystemsManagerSetParameter@1
+  inputs:
+    awsCredentials: 'hello-world-to-AWS'
+    regionName: 'eu-west-1'
+    parameterName: '/simplelambdademo/input'
+    parameterType: 'String'
+    parameterValue: '$(data)'
