@@ -19,7 +19,7 @@ steps:
     readMode: 'single'
     parameterName: '/simplelambdademo/input'
     singleNameTransform: 'custom'
-    customVariableName: 'data'
+    customVariableName: 'AWS-ARN'
 
 - task: LambdaNETCoreDeploy@1
   inputs:
@@ -40,8 +40,9 @@ steps:
     regionName: eu-west-1
     functionName: 'SimpleLambda'
     payload: '"$(data)"'
-    outputVariable: 'data'
+    outputVariable: 'AWS-ARN'
     logType: 'Tail'
+    
 
 - task: SystemsManagerSetParameter@1
   inputs:
@@ -49,4 +50,4 @@ steps:
     regionName: 'eu-west-1'
     parameterName: '/simplelambdademo/input'
     parameterType: 'String'
-    parameterValue: '$(data)'
+    parameterValue: '$(AWS-ARN)'
