@@ -9,7 +9,7 @@ pool:
   name: gs-spring-boot
 
 variables:
-- name: data
+- group: AWS-ARN
 
 steps:
 - task: SystemsManagerGetParameter@1
